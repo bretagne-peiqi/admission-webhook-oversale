@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/admission-webhook-oversale/cmd/config"
+	"github.com/bretagne-peiqi/admission-webhook-oversale/cmd/config"
 
 	"k8s.io/api/admission/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -32,13 +32,12 @@ func getPatchItem(op string, path string, val interface{}) patchOperation {
 	}
 }
 
-func getOriginNodeStatus() int {
-
-}
-
 func initPatch(node corev1.Node) []patchOperation {
 	var patches []patchOperation
-	patches = append(patches, getPatchItem("replace", "/status/allocatable/cpu", "12"))
+	origin := float64(node.Status.Allocatable.Cpu().Value())
+	coff := float64(1.2)
+	fixed := origin*coff
+	patches = append(patches, getPatchItem("replace", "/status/allocatable/cpu", fixed))
 	return patches
 }
 

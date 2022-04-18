@@ -1,4 +1,4 @@
-module github.com/admission-webhook-oversale
+module github.com/bretagne-peiqi/admission-webhook-oversale
 
 go 1.17
 

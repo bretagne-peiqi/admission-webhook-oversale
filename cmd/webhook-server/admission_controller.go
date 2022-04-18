@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/admission-webhook-oversale/cmd/config"
+	"github.com/bretagne-peiqi/admission-webhook-oversale/cmd/config"
 
 	"k8s.io/api/admission/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
