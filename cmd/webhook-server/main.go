@@ -1,14 +1,16 @@
 package main
 
 import (
-	"admission-webhook-oversale-sample/cmd/config"
 	"fmt"
-	"k8s.io/api/admission/v1beta1"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"log"
 	"net/http"
 	"path/filepath"
+
+	"github.com/admission-webhook-oversale/cmd/config"
+
+	"k8s.io/api/admission/v1beta1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -28,6 +30,10 @@ func getPatchItem(op string, path string, val interface{}) patchOperation {
 		Path:  path,
 		Value: val,
 	}
+}
+
+func getOriginNodeStatus() int {
+
 }
 
 func initPatch(node corev1.Node) []patchOperation {
