@@ -8,8 +8,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/bretagne-peiqi/admission-webhook-oversale/cmd/config"
-
 	"k8s.io/api/admission/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -33,7 +31,7 @@ type patchOperation struct {
 
 // admitFunc is a callback for admission controller logic. Given an AdmissionRequest, it returns the sequence of patch
 // operations to be applied in case of success, or the error that will be shown when the operation is rejected.
-type admitFunc func(*v1beta1.AdmissionRequest, *config.ToolConfig) ([]patchOperation, error)
+type admitFunc func(*v1beta1.AdmissionRequest) ([]patchOperation, error)
 
 // isKubeNamespace checks if the given namespace is a Kubernetes-owned namespace.
 func isKubeNamespace(ns string) bool {
@@ -43,7 +41,7 @@ func isKubeNamespace(ns string) bool {
 // doServeAdmitFunc parses the HTTP request for an admission controller webhook, and -- in case of a well-formed
 // request -- delegates the admission control logic to the given admitFunc. The response body is then returned as raw
 // bytes.
-func doServeAdmitFunc(w http.ResponseWriter, r *http.Request, admit admitFunc, config *config.ToolConfig) ([]byte, error) {
+func doServeAdmitFunc(w http.ResponseWriter, r *http.Request, admit admitFunc) ([]byte, error) {
 	// Step 1: Request validation. Only handle POST requests with a body and json content type.
 
 	if r.Method != http.MethodPost {
@@ -86,7 +84,7 @@ func doServeAdmitFunc(w http.ResponseWriter, r *http.Request, admit admitFunc, c
 	// Apply the admit() function only for non-Kubernetes namespaces. For objects in Kubernetes namespaces, return
 	// an empty set of patch operations.
 	if !isKubeNamespace(admissionReviewReq.Request.Namespace) {
-		patchOps, err = admit(admissionReviewReq.Request, config)
+		patchOps, err = admit(admissionReviewReq.Request)
 	}
 
 	if err != nil {
@@ -116,11 +114,11 @@ func doServeAdmitFunc(w http.ResponseWriter, r *http.Request, admit admitFunc, c
 }
 
 // serveAdmitFunc is a wrapper around doServeAdmitFunc that adds error handling and logging.
-func serveAdmitFunc(w http.ResponseWriter, r *http.Request, admit admitFunc, config *config.ToolConfig) {
+func serveAdmitFunc(w http.ResponseWriter, r *http.Request, admit admitFunc) {
 	log.Print("Handling webhook request ...")
 
 	var writeErr error
-	if bytes, err := doServeAdmitFunc(w, r, admit, config); err != nil {
+	if bytes, err := doServeAdmitFunc(w, r, admit); err != nil {
 		log.Printf("Error handling webhook request: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		_, writeErr = w.Write([]byte(err.Error()))
@@ -135,8 +133,8 @@ func serveAdmitFunc(w http.ResponseWriter, r *http.Request, admit admitFunc, con
 }
 
 // admitFuncHandler takes an admitFunc and wraps it into a http.Handler by means of calling serveAdmitFunc.
-func admitFuncHandler(admit admitFunc, config *config.ToolConfig) http.Handler {
+func admitFuncHandler(admit admitFunc) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		serveAdmitFunc(w, r, admit, config)
+		serveAdmitFunc(w, r, admit)
 	})
 }

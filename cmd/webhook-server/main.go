@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/bretagne-peiqi/admission-webhook-oversale/cmd/config"
-
 	"k8s.io/api/admission/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,9 +13,8 @@ import (
 
 const (
 	tlsDir         = `/run/secrets/tls`
-	tlsCertFile    = `cert.pem`
-	tlsKeyFile     = `key.pem`
-	toolAnnotation = `webhook.citiccard.com`
+	tlsCertFile    = `tls.crt`
+	tlsKeyFile     = `tls.key`
 )
 
 var (
@@ -38,10 +35,11 @@ func initPatch(node corev1.Node) []patchOperation {
 	coff := float64(1.2)
 	fixed := origin*coff
 	patches = append(patches, getPatchItem("replace", "/status/allocatable/cpu", fixed))
+	log.Printf("initPatched")
 	return patches
 }
 
-func applyNodeConfig(req *v1beta1.AdmissionRequest, toolConfig *config.ToolConfig) ([]patchOperation, error) {
+func applyNodeConfig(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 	if req.Resource != nodeResource {
 		log.Printf("expect resource to be %s", nodeResource)
 		return nil, nil
@@ -53,21 +51,22 @@ func applyNodeConfig(req *v1beta1.AdmissionRequest, toolConfig *config.ToolConfi
 		return nil, fmt.Errorf("could not deserialize node object: %v", err)
 	}
 	var patches []patchOperation
+	log.Printf("patched")
 	patches = initPatch(node)
 	return patches, nil
 }
 func main() {
 	certPath := filepath.Join(tlsDir, tlsCertFile)
 	keyPath := filepath.Join(tlsDir, tlsKeyFile)
-	toolConfig := config.NewToolConfig()
 	mux := http.NewServeMux()
+	mux.Handle("/mutate", admitFuncHandler(applyNodeConfig))
 	log.Printf("listen on port 8443")
-	mux.Handle("/mutate", admitFuncHandler(applyNodeConfig, &toolConfig))
 	server := &http.Server{
 		// We listen on port 8443 such that we do not need root privileges or extra capabilities for this server.
 		// The Service object will take care of mapping this port to the HTTPS port 443.
 		Addr:    ":8443",
 		Handler: mux,
 	}
+	log.Printf("before listen on certPath and keyPath")
 	log.Fatal(server.ListenAndServeTLS(certPath, keyPath))
 }
