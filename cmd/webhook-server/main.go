@@ -13,8 +13,8 @@ import (
 
 const (
 	tlsDir         = `/run/secrets/tls`
-	tlsCertFile    = `tls.crt`
-	tlsKeyFile     = `tls.key`
+	tlsCertFile    = `crt.pem`
+	tlsKeyFile     = `key.pem`
 )
 
 var (
@@ -67,6 +67,6 @@ func main() {
 		Addr:    ":8443",
 		Handler: mux,
 	}
-	log.Printf("before listen on certPath and keyPath")
+	server.ListenAndServeTLS(certPath, keyPath)
 	log.Fatal(server.ListenAndServeTLS(certPath, keyPath))
 }

@@ -15,9 +15,12 @@ spec:
       labels:
         app: webhook-server
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1234
       containers:
       - name: server
-        image: webhook-server:20220418204126
+        image: webhook-server:20220419154945
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8443
