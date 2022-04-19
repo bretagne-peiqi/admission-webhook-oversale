@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJhbGktaGItdGVzdC5odWlmdXRlc3QuY29tIjp7InVzZXJuYW1lIjoiZGV2MSIsInBhc3N3b3JkIjoiRGV2MTExMTExMSIsImF1dGgiOiJaR1YyTVRwRVpYWXhNVEV4TVRFeCJ9fX0=
+kind: Secret
+metadata:
+  name: ali-hb-test.huifutest.com
+  namespace: webhook
+type: kubernetes.io/dockerconfigjson
+

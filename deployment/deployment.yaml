@@ -15,24 +15,26 @@ spec:
       labels:
         app: webhook-server
     spec:
+      nodeName: cn-shanghai.192.168.37.225
       securityContext:
         runAsNonRoot: true
         runAsUser: 1234
+      imagePullSecrets:
+      - name: ali-hb-test.huifutest.com
       containers:
       - name: server
-        image: webhook-server:20220419154945
+        image: ali-hb-test.huifutest.com/app/webhook-server:v1.0
         imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 1000m
+            memory: 1000Mi
         ports:
         - containerPort: 8443
           name: webhook-api
-        volumeMounts:
-        - name: webhook-tls-certs
-          mountPath: /run/secrets/tls
-          readOnly: true
-      volumes:
-      - name: webhook-tls-certs
-        secret:
-          secretName: webhook-server-tls
 ---
 apiVersion: v1
 kind: Service
