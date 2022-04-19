@@ -15,6 +15,7 @@
 # limitations under the License.
 
 kubectl delete ns webhook
+kubectl delete mutatingwebhookconfigurations webhook
 
 # deploy.sh
 #

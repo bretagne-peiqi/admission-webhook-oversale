@@ -62,8 +62,6 @@ func main() {
 	mux.Handle("/mutate", admitFuncHandler(applyNodeConfig))
 	log.Printf("listen on port 8443")
 	server := &http.Server{
-		// We listen on port 8443 such that we do not need root privileges or extra capabilities for this server.
-		// The Service object will take care of mapping this port to the HTTPS port 443.
 		Addr:    ":8443",
 		Handler: mux,
 	}
