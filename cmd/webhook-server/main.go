@@ -31,11 +31,14 @@ func getPatchItem(op string, path string, val interface{}) patchOperation {
 
 func initPatch(node corev1.Node) []patchOperation {
 	var patches []patchOperation
+        nodeName := node.Name
 	origin := float64(node.Status.Allocatable.Cpu().Value())
+	log.Printf("%s: original cpu value is %f", nodeName, origin)
 	coff := float64(1.2)
 	fixed := origin*coff
+
+	log.Printf("%s: changing cpu value to %f", nodeName, fixed)
 	patches = append(patches, getPatchItem("replace", "/status/allocatable/cpu", fixed))
-	log.Printf("initPatched")
 	return patches
 }
 
@@ -51,7 +54,6 @@ func applyNodeConfig(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 		return nil, fmt.Errorf("could not deserialize node object: %v", err)
 	}
 	var patches []patchOperation
-	log.Printf("patched")
 	patches = initPatch(node)
 	return patches, nil
 }

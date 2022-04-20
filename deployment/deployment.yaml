@@ -24,7 +24,7 @@ spec:
       containers:
       - name: server
         image: ali-hb-test.huifutest.com/app/webhook-server:v1.0
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         resources:
           requests:
             cpu: 100m
@@ -59,9 +59,15 @@ webhooks:
         name: webhook-server
         namespace: webhook
         path: "/mutate"
+        port: 443
       caBundle: ${CA_PEM_B64}
+    matchPolicy: Equivalent
+    failurePolicy: Fail
+    timeoutSeconds: 10
     rules:
-      - operations: [ "UPDATE" ]
-        apiGroups: [""]
+      - operations: [ "UPDATE", "CREATE" ]
+        apiGroups: ["*"]
         apiVersions: ["v1"]
-        resources: ["nodes"]
+        resources: ["nodes/status"]
+        scope: "*"
+ 
