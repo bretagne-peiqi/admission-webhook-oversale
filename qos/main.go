@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	tlsDir         = `/run/secrets/tls`
-	tlsCertFile    = `crt.pem`
-	tlsKeyFile     = `key.pem`
+	tlsDir      = `/run/secrets/tls`
+	tlsCertFile = `crt.pem`
+	tlsKeyFile  = `key.pem`
 )
 
 var (
@@ -36,14 +36,15 @@ func initPatch(pod corev1.Pod) []patchOperation {
 	}
 	podName := pod.Name
 
-	for _, container := range pod.Spec.Containers {
+	for i, container := range pod.Spec.Containers {
 		origin := container.Resources.Requests.Cpu().Value()
 		log.Printf("%s: original cpu value is %f", podName, origin)
 		coff := float64(0.8)
-		fixed := float64(origin)*coff
+		fixed := float64(origin) * coff
 
 		log.Printf("%s: changing cpu value to %f", podName, fixed)
-		patches = append(patches, getPatchItem("replace", "/spec/containers/resources/requests/cpu", fixed))
+		path := "/spec/containers" + i + "resoruces/requests/cpu"
+		patches = append(patches, getPatchItem("replace", path, fixed))
 	}
 	return patches
 }

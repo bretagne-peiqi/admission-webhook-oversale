@@ -1,6 +1,6 @@
 # qos webhook server is a supplementary of oversale solution.
 
-### The idea is to oversale burstable class pods, because guranteed class has to be first ensured and
-### best-efforts class has no left resource to oversale.
+### The idea is to oversale burstable class pods resource, because guaranteed class has to be first ensured and
+### best-efforts class has no resource left to oversale.
 
-### deployment, daemonset by default will be overcounted unless with a label: oversale.huifu.com/mutate: "false"
+### pods in deployment, daemonset by default will be oversaled unless with a label: oversale.huifu.com: "false"
