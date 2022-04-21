@@ -42,8 +42,8 @@ func initPatch(pod corev1.Pod) []patchOperation {
 		coff := float64(0.8)
 		fixed := float64(origin) * coff
 
-		log.Printf("%s: changing cpu value to %f", podName, fixed)
-		path := "/spec/containers" + i + "resoruces/requests/cpu"
+		log.Printf("%s,%d: changing cpu value to %f", podName, i, fixed)
+		path := fmt.Sprintf("/spec/containers/%s/resources/requests/cpu", i)
 		patches = append(patches, getPatchItem("replace", path, fixed))
 	}
 	return patches
