@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qos-server
+  namespace: webhook
+  labels:
+    app: qos-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qos-server
+  template:
+    metadata:
+      labels:
+        app: qos-server
+    spec:
+      nodeName: cn-shanghai.192.168.37.225
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1234
+      imagePullSecrets:
+        - name: ali-hb-test.huifutest.com
+      containers:
+        - name: server
+          image: ali-hb-test.huifutest.com/app/qos-server:v1.0
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 1000m
+              memory: 1000Mi
+          ports:
+            - containerPort: 8443
+              name: qos-api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qos-server
+  namespace: webhook
+spec:
+  selector:
+    app: qos-server
+  ports:
+    - port: 443
+      targetPort: qos-api
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: qos
+webhooks:
+  - name: qos-server.webhook.svc
+    clientConfig:
+      service:
+        name: qos-server
+        namespace: webhook
+        path: "/mutate"
+        port: 8443
+      caBundle: ${CA_PEM_B64}
+    matchPolicy: Equivalent
+    failurePolicy: Fail
+    timeoutSeconds: 10
+    rules:
+      - operations: [ "UPDATE", "CREATE" ]
+        apiGroups: ["*"]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+        scope: "*"
+
