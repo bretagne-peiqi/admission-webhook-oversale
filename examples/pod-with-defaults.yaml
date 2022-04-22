@@ -8,9 +8,15 @@ metadata:
   namespace: webhook
   labels:
     app: pod-with-defaults
+    oversale: enable
 spec:
   restartPolicy: OnFailure
   containers:
     - name: busybox
       image: busybox
       command: ["sleep", "3600000"]
+      resources:
+        limits:
+          cpu: "900m"
+        requests:
+          cpu: "300m"

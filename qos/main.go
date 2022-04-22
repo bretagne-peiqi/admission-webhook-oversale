@@ -17,7 +17,7 @@ const (
 	tlsKeyFile  = `key.pem`
 )
 
-const coff float32 = 0.8
+const coff float64 = 0.8
 
 var (
 	podResource = metav1.GroupVersionResource{Version: "v1", Resource: "pods"}
@@ -33,15 +33,14 @@ func getPatchItem(op string, path string, val interface{}) patchOperation {
 
 func initPatch(pod corev1.Pod) []patchOperation {
 	var patches []patchOperation
-	if pod.Labels["oversale.huifu.com"] == "false" {
+	if pod.Labels["oversale"] == "disabled" {
 		return patches
 	}
 	podName := pod.Name
-
 	for i, container := range pod.Spec.Containers {
-		origin := container.Resources.Requests.Cpu().Value()
-		log.Printf("%s: original cpu value is %d", podName, origin)
-		fixed := float32(origin) * coff
+		origin := container.Resources.Requests.Cpu().AsApproximateFloat64()
+		log.Printf("%s, %d: original cpu value is %f", podName, i, origin)
+		fixed := origin * coff
 
 		log.Printf("%s,%d: changing cpu value to %f", podName, i, fixed)
 		path := fmt.Sprintf("/spec/containers/%d/resources/requests/cpu", i)
@@ -63,6 +62,7 @@ func applyNodeConfig(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 	}
 	var patches []patchOperation
 	patches = initPatch(pod)
+ 	log.Printf("testing pod struct podName %s, podRequestCPU %f, podLimitCPU %d", pod.Name, pod.Spec.Containers[0].Resources.Limits.Cpu().AsApproximateFloat64(), pod.Spec.Containers[0].Resources.Requests.Cpu().MilliValue() )
 	return patches, nil
 }
 func main() {
