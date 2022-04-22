@@ -17,6 +17,8 @@ const (
 	tlsKeyFile  = `key.pem`
 )
 
+const coff float32 = 0.8
+
 var (
 	podResource = metav1.GroupVersionResource{Version: "v1", Resource: "pods"}
 )
@@ -39,8 +41,7 @@ func initPatch(pod corev1.Pod) []patchOperation {
 	for i, container := range pod.Spec.Containers {
 		origin := container.Resources.Requests.Cpu().Value()
 		log.Printf("%s: original cpu value is %f", podName, origin)
-		coff := float64(0.8)
-		fixed := float64(origin) * coff
+		fixed := float32(origin) * coff
 
 		log.Printf("%s,%d: changing cpu value to %f", podName, i, fixed)
 		path := fmt.Sprintf("/spec/containers/%s/resources/requests/cpu", i)

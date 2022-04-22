@@ -12,10 +12,12 @@ import (
 )
 
 const (
-	tlsDir         = `/run/secrets/tls`
-	tlsCertFile    = `crt.pem`
-	tlsKeyFile     = `key.pem`
+	tlsDir      = `/run/secrets/tls`
+	tlsCertFile = `crt.pem`
+	tlsKeyFile  = `key.pem`
 )
+
+const coff float32 = 1.2
 
 var (
 	nodeResource = metav1.GroupVersionResource{Version: "v1", Resource: "nodes"}
@@ -31,11 +33,10 @@ func getPatchItem(op string, path string, val interface{}) patchOperation {
 
 func initPatch(node corev1.Node) []patchOperation {
 	var patches []patchOperation
-        nodeName := node.Name
-	origin := float64(node.Status.Allocatable.Cpu().Value())
+	nodeName := node.Name
+	origin := float32(node.Status.Allocatable.Cpu().Value())
 	log.Printf("%s: original cpu value is %f", nodeName, origin)
-	coff := float64(1.2)
-	fixed := origin*coff
+	fixed := origin * coff
 
 	log.Printf("%s: changing cpu value to %f", nodeName, fixed)
 	patches = append(patches, getPatchItem("replace", "/status/allocatable/cpu", fixed))
