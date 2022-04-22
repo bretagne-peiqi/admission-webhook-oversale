@@ -1,5 +1,5 @@
 FROM docker.io/alpine
-COPY webhook-server /
+COPY qos-server /
 COPY crt.pem /run/secrets/tls/
 COPY key.pem /run/secrets/tls/
 RUN chmod +wr /run/secrets/tls/crt.pem

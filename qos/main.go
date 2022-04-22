@@ -1,4 +1,4 @@
-package qos
+package main
 
 import (
 	"fmt"
@@ -40,11 +40,11 @@ func initPatch(pod corev1.Pod) []patchOperation {
 
 	for i, container := range pod.Spec.Containers {
 		origin := container.Resources.Requests.Cpu().Value()
-		log.Printf("%s: original cpu value is %f", podName, origin)
+		log.Printf("%s: original cpu value is %d", podName, origin)
 		fixed := float32(origin) * coff
 
 		log.Printf("%s,%d: changing cpu value to %f", podName, i, fixed)
-		path := fmt.Sprintf("/spec/containers/%s/resources/requests/cpu", i)
+		path := fmt.Sprintf("/spec/containers/%d/resources/requests/cpu", i)
 		patches = append(patches, getPatchItem("replace", path, fixed))
 	}
 	return patches

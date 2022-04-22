@@ -1,4 +1,4 @@
-package qos
+package main
 
 import (
 "encoding/json"

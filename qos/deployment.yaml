@@ -15,7 +15,7 @@ spec:
       labels:
         app: qos-server
     spec:
-      nodeName: cn-shanghai.192.168.37.225
+      nodeName: cn-shanghai.192.168.25.189
       securityContext:
         runAsNonRoot: true
         runAsUser: 1234
@@ -59,13 +59,13 @@ webhooks:
         name: qos-server
         namespace: webhook
         path: "/mutate"
-        port: 8443
+        port: 443
       caBundle: ${CA_PEM_B64}
     matchPolicy: Equivalent
     failurePolicy: Fail
     timeoutSeconds: 10
     rules:
-      - operations: [ "UPDATE", "CREATE" ]
+      - operations: [ "CREATE" ]
         apiGroups: ["*"]
         apiVersions: ["v1"]
         resources: ["pods"]
